@@ -15,11 +15,13 @@ class ParentBar(QWidget):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 is_vertical: bool = False
                  ) -> None:
         super().__init__(parent)
 
         self._center_on_parent: bool = center_on_parent
         self._disable_parent_when_running: bool = disable_parent_when_running
+        self._is_vertical = is_vertical
 
         if minimum is not None and maximum is not None:
             self._is_determinate = True
@@ -52,11 +54,26 @@ class ParentBar(QWidget):
 
     def _update_size(self) -> None:
         """Update the size of the ProgressBar."""
-        if self._bar_length is not None:
-            self.setFixedWidth(self._bar_length)
+        if self._is_vertical:
+            if self._bar_length is not None:
+                self.setFixedHeight(self._bar_length)
+            else:
+                self._bar_length = self.size().height()
 
-        if self._bar_height is not None:
-            self.setFixedHeight(self._bar_height)
+            if self._bar_height is not None:
+                self.setFixedWidth(self._bar_height)
+            else:
+                self._bar_height = self.size().width()
+        else:
+            if self._bar_length is not None:
+                self.setFixedWidth(self._bar_length)
+            else:
+                self._bar_length = self.size().width()
+
+            if self._bar_height is not None:
+                self.setFixedHeight(self._bar_height)
+            else:
+                self._bar_height = self.size().height()
 
     # def _update_timer(self) -> None:
     #     """Update the spinning speed of the WaitingSpinner."""
