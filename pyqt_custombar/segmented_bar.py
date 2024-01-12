@@ -16,6 +16,7 @@ class SegmentedBar(ParentBar):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 is_vertical: bool = False,
                  segment_width: int = 10,
                  segment_spacing: int = 2,
                  segment_roundness: float = 0.0
@@ -27,7 +28,8 @@ class SegmentedBar(ParentBar):
                          disable_parent_when_running=disable_parent_when_running,
                          bar_length=bar_length,
                          bar_height=bar_height,
-                         color=color)
+                         color=color,
+                         is_vertical=is_vertical)
 
         self._num_of_segs = None
         self._seg_width = None
@@ -52,7 +54,33 @@ class SegmentedBar(ParentBar):
         for i in range(num_of_filled_segs):
             painter.save()
             seg_pos = (self._seg_width + self._seg_spacing) * i
-            painter.translate(seg_pos, 0)
+            painter.setBrush(self._color)
+            if self._is_vertical:
+                painter.translate(0, self._bar_length - seg_pos)
+                painter.drawRoundedRect(
+                    QRect(
+                        0,
+                        0,
+                        self._bar_height,
+                        -self._seg_width
+                    ),
+                    self._seg_roundness,
+                    self._seg_roundness,
+                    Qt.SizeMode.RelativeSize,
+                )
+            else:
+                painter.translate(seg_pos, 0)
+                painter.drawRoundedRect(
+                    QRect(
+                        0,
+                        0,
+                        self._seg_width,
+                        self._bar_height,
+                    ),
+                    self._seg_roundness,
+                    self._seg_roundness,
+                    Qt.SizeMode.RelativeSize,
+                )
 
             # distance = self._line_count_distance_from_primary(
             #     i, self._current_counter, self._number_of_lines
@@ -64,21 +92,8 @@ class SegmentedBar(ParentBar):
             #     self._minimum_trail_opacity,
             #     self._color,
             # )
-            
-            painter.setBrush(self._color)
-            painter.drawRoundedRect(
-                QRect(
-                    0,
-                    0,
-                    self._seg_width,
-                    self.size().height(),
-                ),
-                self._seg_roundness,
-                self._seg_roundness,
-                Qt.SizeMode.RelativeSize,
-            )
             painter.restore()
 
     def _set_number_of_segs(self):
-        self._num_of_segs = round(self.size().width() / (self._target_seg_width + self._seg_spacing))
-        self._seg_width = int((self.size().width() - (self._num_of_segs * self._seg_spacing)) / self._num_of_segs)
+        self._num_of_segs = round(self._bar_length / (self._target_seg_width + self._seg_spacing))
+        self._seg_width = int((self._bar_length - (self._num_of_segs * self._seg_spacing)) / self._num_of_segs)
