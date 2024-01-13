@@ -16,6 +16,7 @@ class FilledBar(ParentBar):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 border_width: int = 2,
                  is_vertical: bool = False
                  ) -> None:
         super().__init__(parent=parent,
@@ -26,6 +27,7 @@ class FilledBar(ParentBar):
                          bar_length=bar_length,
                          bar_height=bar_height,
                          color=color,
+                         border_width=border_width,
                          is_vertical=is_vertical)
 
         self._num_of_segs = None
@@ -46,9 +48,15 @@ class FilledBar(ParentBar):
         painter.setBrush(self._color)
 
         if self._is_vertical:
-            painter.drawRect(0, 0, self._bar_height, math.floor(self._bar_length * self.get_percent_complete()))
+            painter.drawRect(math.ceil(self._border_width / 2),
+                             self._bar_length + math.ceil(self._border_width / 2),
+                             self._bar_height,
+                             -math.floor(self._bar_length * self.get_percent_complete()))
         else:
-            painter.drawRect(0, 0, math.floor(self._bar_length * self.get_percent_complete()), self._bar_height)
+            painter.drawRect(math.ceil(self._border_width / 2),
+                             math.ceil(self._border_width / 2),
+                             math.floor(self._bar_length * self.get_percent_complete()),
+                             self._bar_height)
 
         painter.restore()
 

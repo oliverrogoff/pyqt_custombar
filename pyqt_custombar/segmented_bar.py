@@ -16,6 +16,7 @@ class SegmentedBar(ParentBar):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 border_width: int = 2,
                  is_vertical: bool = False,
                  segment_width: int = 10,
                  segment_spacing: int = 2,
@@ -29,6 +30,7 @@ class SegmentedBar(ParentBar):
                          bar_length=bar_length,
                          bar_height=bar_height,
                          color=color,
+                         border_width=border_width,
                          is_vertical=is_vertical)
 
         self._num_of_segs = None
@@ -49,9 +51,6 @@ class SegmentedBar(ParentBar):
         painter.fillRect(self.rect(), Qt.GlobalColor.transparent)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
 
-        # if self._current_counter >= self._number_of_lines:
-        #     self._current_counter = 0
-
         painter.setPen(Qt.PenStyle.NoPen)
         num_of_filled_segs = int(self._percent_complete * self._num_of_segs)
         for i in range(num_of_filled_segs):
@@ -59,7 +58,7 @@ class SegmentedBar(ParentBar):
             seg_pos = (self._seg_width + self._seg_spacing) * i
             painter.setBrush(self._color)
             if self._is_vertical:
-                painter.translate(0, self._bar_length - seg_pos)
+                painter.translate(math.ceil(self._border_width / 2), self._bar_length - seg_pos + math.ceil(self._border_width / 2))
                 painter.drawRoundedRect(
                     QRect(
                         0,
@@ -72,7 +71,7 @@ class SegmentedBar(ParentBar):
                     Qt.SizeMode.RelativeSize,
                 )
             else:
-                painter.translate(seg_pos, 0)
+                painter.translate(seg_pos + math.ceil(self._border_width / 2), math.ceil(self._border_width / 2))
                 painter.drawRoundedRect(
                     QRect(
                         0,
@@ -85,16 +84,6 @@ class SegmentedBar(ParentBar):
                     Qt.SizeMode.RelativeSize,
                 )
 
-            # distance = self._line_count_distance_from_primary(
-            #     i, self._current_counter, self._number_of_lines
-            # )
-            # color = self._current_line_color(
-            #     distance,
-            #     self._number_of_lines,
-            #     self._trail_fade_percentage,
-            #     self._minimum_trail_opacity,
-            #     self._color,
-            # )
             painter.restore()
 
     def _set_number_of_segs(self):

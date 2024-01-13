@@ -16,6 +16,7 @@ class ParentBar(QWidget):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 border_width: int = 2,
                  is_vertical: bool = False
                  ) -> None:
         super().__init__(parent)
@@ -39,6 +40,7 @@ class ParentBar(QWidget):
         self._color: QColor = QColor(color[0], color[1], color[2])
         self._bar_length = bar_length
         self._bar_height = bar_height
+        self._border_width = border_width
 
         self._current_value = 0
         self._percent_complete = 0.0
@@ -57,22 +59,22 @@ class ParentBar(QWidget):
         """Update the size of the ProgressBar."""
         if self._is_vertical:
             if self._bar_length is not None:
-                self.setFixedHeight(self._bar_length)
+                self.setFixedHeight(self._bar_length + (2 * math.ceil(self._border_width / 2)))
             else:
                 self._bar_length = self.size().height()
 
             if self._bar_height is not None:
-                self.setFixedWidth(self._bar_height)
+                self.setFixedWidth(self._bar_height + (2 * math.ceil(self._border_width / 2)))
             else:
                 self._bar_height = self.size().width()
         else:
             if self._bar_length is not None:
-                self.setFixedWidth(self._bar_length)
+                self.setFixedWidth(self._bar_length + (2 * math.ceil(self._border_width / 2)))
             else:
                 self._bar_length = self.size().width()
 
             if self._bar_height is not None:
-                self.setFixedHeight(self._bar_height)
+                self.setFixedHeight(self._bar_height + (2 * math.ceil(self._border_width / 2)))
             else:
                 self._bar_height = self.size().height()
 
@@ -134,12 +136,19 @@ class ParentBar(QWidget):
 
     def _paint_border(self):
         outline_painter = QPainter(self)
-        outline_painter.setPen(QPen())
-        outline_painter.pen().setWidth(10)
+        pen = QPen()
+        pen.setWidth(self._border_width)
+        outline_painter.setPen(pen)
         if self._is_vertical:
-            outline_painter.drawRect(QRect(0, 0, self._bar_height, self._bar_length))
+            outline_painter.drawRect(QRect(1 if self._border_width % 2 else 0,
+                                           1 if self._border_width % 2 else 0,
+                                           self._bar_height + (2 * math.floor(self._border_width / 2)),
+                                           self._bar_length + (2 * math.floor(self._border_width / 2))))
         else:
-            outline_painter.drawRect(QRect(0, 0, self._bar_length, self._bar_height))
+            outline_painter.drawRect(QRect(1 if self._border_width % 2 else 0,
+                                           1 if self._border_width % 2 else 0,
+                                           self._bar_length + (2 * math.floor(self._border_width / 2)),
+                                           self._bar_height + (2 * math.floor(self._border_width / 2))))
 
     def get_percent_complete(self):
         return self._percent_complete
