@@ -1,7 +1,8 @@
 import sys
 import math
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import QRect
+from PyQt6.QtGui import QColor, QPainter, QPen
 
 
 class ParentBar(QWidget):
@@ -130,6 +131,14 @@ class ParentBar(QWidget):
             result_alpha = min(1.0, max(0.0, result_alpha))
             color.setAlphaF(result_alpha)
         return color
+
+    def _paint_border(self):
+        outline_painter = QPainter(self)
+        outline_painter.setPen(QPen())
+        if self._is_vertical:
+            outline_painter.drawRect(QRect(0, 0, self._bar_height, self._bar_length))
+        else:
+            outline_painter.drawRect(QRect(0, 0, self._bar_length, self._bar_height))
 
     def get_percent_complete(self):
         return self._percent_complete

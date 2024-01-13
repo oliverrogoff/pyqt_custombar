@@ -2,7 +2,7 @@ import sys
 import math
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import Qt, QTimer, QRect
-from PyQt6.QtGui import QColor, QPainter, QPaintEvent
+from PyQt6.QtGui import QColor, QPainter, QPaintEvent, QPen, QBrush
 from .parent_bar import ParentBar
 
 
@@ -42,6 +42,9 @@ class SegmentedBar(ParentBar):
     def paintEvent(self, _: QPaintEvent) -> None:
         """Paint the SegmentedBar."""
         self._update_position()
+
+        self._paint_border()
+
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.GlobalColor.transparent)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
