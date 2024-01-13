@@ -135,6 +135,7 @@ class ParentBar(QWidget):
     def _paint_border(self):
         outline_painter = QPainter(self)
         outline_painter.setPen(QPen())
+        outline_painter.pen().setWidth(10)
         if self._is_vertical:
             outline_painter.drawRect(QRect(0, 0, self._bar_height, self._bar_length))
         else:
