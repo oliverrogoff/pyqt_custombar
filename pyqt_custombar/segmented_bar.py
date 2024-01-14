@@ -35,6 +35,7 @@ class SegmentedBar(ParentBar):
 
         self._num_of_segs = None
         self._seg_width = None
+        self._extra_room = None
         self._target_seg_width = segment_width
         self._seg_spacing = segment_spacing
         self._set_number_of_segs()
@@ -56,6 +57,14 @@ class SegmentedBar(ParentBar):
         for i in range(num_of_filled_segs):
             painter.save()
             seg_pos = (self._seg_width + self._seg_spacing) * i
+
+            if i < self._extra_room:
+                seg_pos += i
+                current_seg_width = self._seg_width + 1
+            else:
+                seg_pos += self._extra_room
+                current_seg_width = self._seg_width
+
             painter.setBrush(self._color)
             if self._is_vertical:
                 painter.translate(math.ceil(self._border_width / 2), self._bar_length - seg_pos + math.ceil(self._border_width / 2))
@@ -64,7 +73,7 @@ class SegmentedBar(ParentBar):
                         0,
                         0,
                         self._bar_height,
-                        -self._seg_width
+                        -current_seg_width
                     ),
                     self._seg_roundness,
                     self._seg_roundness,
@@ -76,7 +85,7 @@ class SegmentedBar(ParentBar):
                     QRect(
                         0,
                         0,
-                        self._seg_width,
+                        current_seg_width,
                         self._bar_height,
                     ),
                     self._seg_roundness,
@@ -87,5 +96,6 @@ class SegmentedBar(ParentBar):
             painter.restore()
 
     def _set_number_of_segs(self):
-        self._num_of_segs = round(self._bar_length / (self._target_seg_width + self._seg_spacing))
-        self._seg_width = int((self._bar_length - (self._num_of_segs * self._seg_spacing)) / self._num_of_segs)
+        self._num_of_segs = round((self._bar_length + self._seg_spacing) / (self._target_seg_width + self._seg_spacing))
+        self._seg_width = math.floor((self._bar_length - (self._num_of_segs * self._seg_spacing - self._seg_spacing)) / self._num_of_segs)
+        self._extra_room = self._bar_length - (self._num_of_segs * self._seg_spacing - self._seg_spacing) - (self._num_of_segs * self._seg_width)
