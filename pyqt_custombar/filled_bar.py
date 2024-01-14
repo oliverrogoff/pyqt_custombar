@@ -59,15 +59,3 @@ class FilledBar(ParentBar):
                              self._bar_height)
 
         painter.restore()
-
-        # distance = self._line_count_distance_from_primary(
-        #     i, self._current_counter, self._number_of_lines
-        # )
-        # color = self._current_line_color(
-        #     distance,
-        #     self._number_of_lines,
-        #     self._trail_fade_percentage,
-        #     self._minimum_trail_opacity,
-        #     self._color,
-        # )
-        # painter.restore()
