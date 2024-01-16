@@ -1,7 +1,7 @@
 import sys
 import math
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import Qt, QRect, QPointF, QPoint, QRectF
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPainter, QPen, QPainterPath
 
 
@@ -16,6 +16,7 @@ class ParentBar(QWidget):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 background_color: tuple[int, int, int] = (-1, -1, -1),
                  border_width: int = 1,
                  border_roundness: float = 0.5,
                  is_vertical: bool = False
@@ -39,9 +40,16 @@ class ParentBar(QWidget):
             self._maximum = maximum
 
         self._color: QColor = QColor(color[0], color[1], color[2])
-        self._bar_length = bar_length
-        self._bar_height = bar_height
-        self._border_width = border_width
+        self._bar_length: int = bar_length
+        self._bar_height: int = bar_height
+        self._border_width: int = border_width
+
+        if background_color is not None:
+            if background_color[0] == -1:
+                new_color = lighten_color(color, 60)
+                self._background_color: QColor = QColor(new_color[0], new_color[1], new_color[2])
+            else:
+                self._background_color: QColor = QColor(background_color[0], background_color[1], background_color[2])
 
         if 0 <= border_roundness <= 1:
             self._border_roundness = border_roundness * self._bar_height * 0.6
@@ -146,11 +154,23 @@ class ParentBar(QWidget):
     def _paint_border(self):
         if self._update_border() is None:
             self._update_border()
-        outline_painter = QPainter(self)
-        pen = QPen()
-        pen.setWidth(self._border_width)
-        outline_painter.setPen(pen)
-        outline_painter.drawPath(self._border_path)
+
+        if self._border_width > 0:
+            outline_painter = QPainter(self)
+            pen = QPen()
+            pen.setWidth(self._border_width)
+            outline_painter.setPen(pen)
+            outline_painter.drawPath(self._border_path)
+
+    def _paint_background(self):
+        if self._update_border() is None:
+            self._update_border()
+
+        if self._background_color is not None:
+            painter = QPainter(self)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(self._background_color)
+            painter.drawPath(self._border_path)
 
     def _update_border(self):
         path = QPainterPath()
@@ -202,3 +222,14 @@ class ParentBar(QWidget):
     def start_bar(self):
         self._update_position()
         self.show()
+
+
+def lighten_color(color: tuple[int, int, int], amount_lightened: int):
+    red = color[0]
+    new_red = round(color[0] + min(255 - red, amount_lightened))
+    red_diff = 255 - color[0]
+    red_increase = new_red - color[0]
+    increase_fraction = red_increase / red_diff
+    new_green = round(color[1] + (255 - color[1]) * increase_fraction)
+    new_blue = round(color[2] + (255 - color[2]) * increase_fraction)
+    return new_red, new_green, new_blue

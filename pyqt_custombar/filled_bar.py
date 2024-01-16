@@ -15,6 +15,7 @@ class FilledBar(ParentBar):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 background_color: tuple[int, int, int] = (-1, -1, -1),
                  border_width: int = 2,
                  border_roundness: float = 0.6,
                  is_vertical: bool = False
@@ -27,6 +28,7 @@ class FilledBar(ParentBar):
                          bar_length=bar_length,
                          bar_height=bar_height,
                          color=color,
+                         background_color=background_color,
                          border_width=border_width,
                          border_roundness=border_roundness,
                          is_vertical=is_vertical)
@@ -38,6 +40,7 @@ class FilledBar(ParentBar):
         """Paint the SegmentedBar."""
         self._update_position()
         self._update_border()
+        self._paint_background()
 
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.GlobalColor.transparent)

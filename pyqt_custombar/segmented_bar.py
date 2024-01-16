@@ -1,6 +1,6 @@
 import math
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import Qt, QRect, QRectF
+from PyQt6.QtCore import Qt, QRectF
 from PyQt6.QtGui import QPainter, QPaintEvent
 from .parent_bar import ParentBar
 
@@ -15,6 +15,7 @@ class SegmentedBar(ParentBar):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
+                 background_color: tuple[int, int, int] = (-1, -1, -1),
                  border_width: int = 2,
                  border_roundness: float = 7,
                  is_vertical: bool = False,
@@ -30,6 +31,7 @@ class SegmentedBar(ParentBar):
                          bar_length=bar_length,
                          bar_height=bar_height,
                          color=color,
+                         background_color=background_color,
                          border_width=border_width,
                          border_roundness=border_roundness,
                          is_vertical=is_vertical)
@@ -47,6 +49,7 @@ class SegmentedBar(ParentBar):
         """Paint the SegmentedBar."""
         self._update_position()
         self._update_border()
+        self._paint_background()
 
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.GlobalColor.transparent)
