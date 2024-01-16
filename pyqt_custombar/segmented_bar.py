@@ -1,3 +1,4 @@
+import sys
 import math
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import Qt, QRectF
@@ -43,7 +44,11 @@ class SegmentedBar(ParentBar):
         self._seg_spacing = segment_spacing
         self._set_number_of_segs()
 
-        self._seg_roundness = segment_roundness
+        if 0.0 <= segment_roundness <= 1.0:
+            self._seg_roundness = segment_roundness * 100
+        else:
+            print("Error: segment roundness must be a float between 0 and 1")
+            sys.exit()
 
     def paintEvent(self, _: QPaintEvent) -> None:
         """Paint the SegmentedBar."""
