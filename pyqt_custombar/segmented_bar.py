@@ -1,6 +1,6 @@
 import math
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import Qt, QRect
+from PyQt6.QtCore import Qt, QRect, QRectF
 from PyQt6.QtGui import QPainter, QPaintEvent
 from .parent_bar import ParentBar
 
@@ -16,6 +16,7 @@ class SegmentedBar(ParentBar):
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
                  border_width: int = 2,
+                 border_roundness: float = 7,
                  is_vertical: bool = False,
                  segment_width: int = 10,
                  segment_spacing: int = 2,
@@ -30,6 +31,7 @@ class SegmentedBar(ParentBar):
                          bar_height=bar_height,
                          color=color,
                          border_width=border_width,
+                         border_roundness=border_roundness,
                          is_vertical=is_vertical)
 
         self._num_of_segs = None
@@ -44,14 +46,14 @@ class SegmentedBar(ParentBar):
     def paintEvent(self, _: QPaintEvent) -> None:
         """Paint the SegmentedBar."""
         self._update_position()
-
-        self._paint_border()
+        self._update_border()
 
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.GlobalColor.transparent)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-
         painter.setPen(Qt.PenStyle.NoPen)
+        painter.setClipPath(self._border_path, Qt.ClipOperation.ReplaceClip)
+
         num_of_filled_segs = int(self._percent_complete * self._num_of_segs)
         for i in range(num_of_filled_segs):
             painter.save()
@@ -66,11 +68,11 @@ class SegmentedBar(ParentBar):
 
             painter.setBrush(self._color)
             if self._is_vertical:
-                painter.translate(math.ceil(self._border_width / 2), self._bar_length - seg_pos + math.ceil(self._border_width / 2))
+                painter.translate(0, self._bar_length - seg_pos)
                 painter.drawRoundedRect(
-                    QRect(
-                        0,
-                        0,
+                    QRectF(
+                        self._border_width,
+                        self._border_width,
                         self._bar_height,
                         -current_seg_width
                     ),
@@ -79,11 +81,11 @@ class SegmentedBar(ParentBar):
                     Qt.SizeMode.RelativeSize,
                 )
             else:
-                painter.translate(seg_pos + math.ceil(self._border_width / 2), math.ceil(self._border_width / 2))
+                painter.translate(seg_pos, 0)
                 painter.drawRoundedRect(
-                    QRect(
-                        0,
-                        0,
+                    QRectF(
+                        self._border_width,
+                        self._border_width,
                         current_seg_width,
                         self._bar_height,
                     ),
@@ -91,8 +93,9 @@ class SegmentedBar(ParentBar):
                     self._seg_roundness,
                     Qt.SizeMode.RelativeSize,
                 )
-
             painter.restore()
+
+        self._paint_border()
 
     def _set_number_of_segs(self):
         self._num_of_segs = round((self._bar_length + self._seg_spacing) / (self._target_seg_width + self._seg_spacing))

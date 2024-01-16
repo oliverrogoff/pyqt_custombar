@@ -1,7 +1,6 @@
-import sys
 import math
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QRectF
 from PyQt6.QtGui import QPainter, QPaintEvent
 from .parent_bar import ParentBar
 
@@ -17,6 +16,7 @@ class FilledBar(ParentBar):
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
                  border_width: int = 2,
+                 border_roundness: float = 0.6,
                  is_vertical: bool = False
                  ) -> None:
         super().__init__(parent=parent,
@@ -28,6 +28,7 @@ class FilledBar(ParentBar):
                          bar_height=bar_height,
                          color=color,
                          border_width=border_width,
+                         border_roundness=border_roundness,
                          is_vertical=is_vertical)
 
         self._num_of_segs = None
@@ -36,8 +37,7 @@ class FilledBar(ParentBar):
     def paintEvent(self, _: QPaintEvent) -> None:
         """Paint the SegmentedBar."""
         self._update_position()
-
-        self._paint_border()
+        self._update_border()
 
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.GlobalColor.transparent)
@@ -47,15 +47,22 @@ class FilledBar(ParentBar):
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._color)
 
+        painter.setClipPath(self._border_path, Qt.ClipOperation.ReplaceClip)
+
         if self._is_vertical:
-            painter.drawRect(math.ceil(self._border_width / 2),
-                             self._bar_length + math.ceil(self._border_width / 2),
-                             self._bar_height,
-                             -math.floor(self._bar_length * self.get_percent_complete()))
+            painter.drawRect(QRectF(
+                    self._border_width,
+                    self._bar_length + self._border_width,
+                    self._bar_height,
+                    -math.floor(self._bar_length * self.get_percent_complete())
+                ))
         else:
-            painter.drawRect(math.ceil(self._border_width / 2),
-                             math.ceil(self._border_width / 2),
-                             math.floor(self._bar_length * self.get_percent_complete()),
-                             self._bar_height)
+            painter.drawRect(QRectF(
+                    self._border_width,
+                    self._border_width,
+                    math.floor(self._bar_length * self.get_percent_complete()),
+                    self._bar_height,
+                ))
 
         painter.restore()
+        self._paint_border()

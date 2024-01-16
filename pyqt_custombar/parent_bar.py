@@ -1,8 +1,8 @@
 import sys
 import math
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import QRect
-from PyQt6.QtGui import QColor, QPainter, QPen
+from PyQt6.QtCore import Qt, QRect, QPointF, QPoint, QRectF
+from PyQt6.QtGui import QColor, QPainter, QPen, QPainterPath
 
 
 class ParentBar(QWidget):
@@ -16,7 +16,8 @@ class ParentBar(QWidget):
                  bar_length: int = None,
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
-                 border_width: int = 2,
+                 border_width: int = 1,
+                 border_roundness: float = 0.5,
                  is_vertical: bool = False
                  ) -> None:
         super().__init__(parent)
@@ -25,7 +26,7 @@ class ParentBar(QWidget):
         self._disable_parent_when_running: bool = disable_parent_when_running
         self._is_vertical = is_vertical
 
-        if minimum is not None and maximum is not None:
+        if minimum is not None or maximum is not None:
             self._is_determinate = True
         else:
             self._is_determinate = False
@@ -42,8 +43,16 @@ class ParentBar(QWidget):
         self._bar_height = bar_height
         self._border_width = border_width
 
+        if 0 <= border_roundness <= 1:
+            self._border_roundness = border_roundness * self._bar_height * 0.6
+        else:
+            print("Error: border roundness must be a float between 0 and 1")
+            sys.exit()
+
         self._current_value = 0
         self._percent_complete = 0.0
+
+        self._border_path = None
 
         # self._current_counter: int = 0
         # self._timer: QTimer = QTimer(self)
@@ -59,22 +68,22 @@ class ParentBar(QWidget):
         """Update the size of the ProgressBar."""
         if self._is_vertical:
             if self._bar_length is not None:
-                self.setFixedHeight(self._bar_length + (2 * math.ceil(self._border_width / 2)))
+                self.setFixedHeight(self._bar_length + (2 * self._border_width))
             else:
                 self._bar_length = self.size().height()
 
             if self._bar_height is not None:
-                self.setFixedWidth(self._bar_height + (2 * math.ceil(self._border_width / 2)))
+                self.setFixedWidth(self._bar_height + (2 * self._border_width))
             else:
                 self._bar_height = self.size().width()
         else:
             if self._bar_length is not None:
-                self.setFixedWidth(self._bar_length + (2 * math.ceil(self._border_width / 2)))
+                self.setFixedWidth(self._bar_length + (2 * self._border_width))
             else:
                 self._bar_length = self.size().width()
 
             if self._bar_height is not None:
-                self.setFixedHeight(self._bar_height + (2 * math.ceil(self._border_width / 2)))
+                self.setFixedHeight(self._bar_height + (2 * self._border_width))
             else:
                 self._bar_height = self.size().height()
 
@@ -135,20 +144,42 @@ class ParentBar(QWidget):
         return color
 
     def _paint_border(self):
+        if self._update_border() is None:
+            self._update_border()
         outline_painter = QPainter(self)
         pen = QPen()
         pen.setWidth(self._border_width)
         outline_painter.setPen(pen)
+        outline_painter.drawPath(self._border_path)
+
+    def _update_border(self):
+        path = QPainterPath()
+
+        x = self._border_width / 2
+        y = self._border_width / 2
+
         if self._is_vertical:
-            outline_painter.drawRect(QRect(1 if self._border_width % 2 else 0,
-                                           1 if self._border_width % 2 else 0,
-                                           self._bar_height + (2 * math.floor(self._border_width / 2)),
-                                           self._bar_length + (2 * math.floor(self._border_width / 2))))
+            width = self._bar_height + self._border_width
+            height = self._bar_length + self._border_width
+
         else:
-            outline_painter.drawRect(QRect(1 if self._border_width % 2 else 0,
-                                           1 if self._border_width % 2 else 0,
-                                           self._bar_length + (2 * math.floor(self._border_width / 2)),
-                                           self._bar_height + (2 * math.floor(self._border_width / 2))))
+            width = self._bar_length + self._border_width
+            height = self._bar_height + self._border_width
+
+        path.moveTo(x + self._border_roundness, y)
+        path.arcTo(x, y, 2 * self._border_roundness, 2 * self._border_roundness, 90.0, 90.0)
+        path.lineTo(x, y + (height - self._border_roundness))
+        path.arcTo(x, y + (height - 2 * self._border_roundness),
+                   2 * self._border_roundness, 2 * self._border_roundness, 180.0, 90.0)
+        path.lineTo(x + (width - self._border_roundness), y + height)
+        path.arcTo(x + (width - 2 * self._border_roundness), y + (height - 2 * self._border_roundness),
+                   2 * self._border_roundness, 2 * self._border_roundness, 270.0, 90.0)
+        path.lineTo(x + width, y + self._border_roundness)
+        path.arcTo(x + (width - 2 * self._border_roundness), y,
+                   2 * self._border_roundness, 2 * self._border_roundness, 0.0, 90.0)
+        path.lineTo(x + self._border_roundness, y)
+
+        self._border_path = path
 
     def get_percent_complete(self):
         return self._percent_complete
