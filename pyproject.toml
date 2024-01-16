@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyqt_custombar"
+authors = [
+    {name = "Oliver Rogoff", email = "oliverogoff4@gmail.com"},
+]
+description = "A module for adding customized loading bar widgets to a PyQt6 project"
+requires-python = ">=3.6.1"
+
+license = {file = 'LICENSE.md'}
+classifiers = [
+    "Framework :: PyQt6",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "PyQt6==6.6.1",
+    "PyQt6-Qt6==6.6.1",
+    "PyQt6-sip==13.6.0",
+]
+
+dynamic = ["version", "readme"]
+
+[project.gui-scripts]
+
+
+[tool.setuptools.dynamic]
+version = {file = "pyqt_custombar.version.py"}
+readme = {file = ["README.md"]}
+
+[tool.setuptools.packages.find]
+exclude = ["dev*"]
