@@ -17,6 +17,7 @@ class ParentBar(QWidget):
                  bar_height: int = None,
                  color: tuple[int, int, int] = (0, 0, 0),
                  background_color: tuple[int, int, int] = (-1, -1, -1),
+                 border_color: tuple[int, int, int] = (70, 70, 70),
                  border_width: int = 1,
                  border_roundness: float = 0.5,
                  is_vertical: bool = False
@@ -36,6 +37,7 @@ class ParentBar(QWidget):
         self._maximum = maximum
 
         self._color: QColor = QColor(color[0], color[1], color[2])
+        self._border_color: QColor = QColor(border_color[0], border_color[1], border_color[2])
         self._bar_length: int = bar_length
         self._bar_height: int = bar_height
         self._border_width: int = border_width
@@ -136,6 +138,7 @@ class ParentBar(QWidget):
             outline_painter = QPainter(self)
             pen = QPen()
             pen.setWidth(self._border_width)
+            pen.setColor(self._border_color)
             outline_painter.setPen(pen)
             outline_painter.drawPath(self._border_path)
 
@@ -196,6 +199,9 @@ class ParentBar(QWidget):
     def get_background_color(self):
         return self._background_color.getRgb()
 
+    def get_border_color(self):
+        return self._border_color.getRgb()
+
     def get_border_width(self):
         return self._border_width
 
@@ -238,6 +244,10 @@ class ParentBar(QWidget):
 
     def set_color(self, color: tuple[int, int, int]):
         self._color = QColor(color[0], color[1], color[2])
+        self.repaint()
+
+    def set_border_color(self, border_color: tuple[int, int, int]):
+        self._border_color = border_color
         self.repaint()
 
     def set_background_color(self, background_color: tuple[int, int, int]):

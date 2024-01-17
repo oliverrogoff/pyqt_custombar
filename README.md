@@ -44,6 +44,10 @@ The parameters that both progress bar widgets have in common are as follows:
   - if you pass in `None`, the unfilled portion of the bar will be empty (transparent)
   - if you pass in `(-1, -1, -1)`, the color will be automatically assigned as a lighter hue of the bars color
   - default: `(-1, -1, -1)`
+- border_color
+  - type: `tuple[int, int, int]`
+  - the color of the bars border
+  - default: `(70, 70, 70)`
 - border_width
   - type: `int`
   - the width of the outline of the progress bar
@@ -116,9 +120,9 @@ bar = SegmentedBar(
     bar_length=250,
     bar_height=20,
     color=(137, 49, 19),
-    background_color=(-1, -1, -1),
+    background_color=(192, 192, 192),
     border_width=0,
-    border_roundness=1.0,
+    border_roundness=0.2,
     is_vertical=False,
     segment_width=20,
     segment_spacing=2,
