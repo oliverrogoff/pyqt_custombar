@@ -27,47 +27,30 @@ class ParentBar(QWidget):
         self._disable_parent_when_running: bool = disable_parent_when_running
         self._is_vertical = is_vertical
 
-        if minimum is not None or maximum is not None:
+        if minimum is not None and maximum is not None:
             self._is_determinate = True
         else:
             self._is_determinate = False
 
-        if self._is_determinate:
-            if minimum is None or maximum is None:
-                print("Error: If is determinate must declare minimum and maximum values")
-                sys.exit()
-            self._minimum = minimum
-            self._maximum = maximum
+        self._minimum = minimum
+        self._maximum = maximum
 
         self._color: QColor = QColor(color[0], color[1], color[2])
         self._bar_length: int = bar_length
         self._bar_height: int = bar_height
         self._border_width: int = border_width
 
-        if background_color is not None:
-            if background_color[0] == -1:
-                new_color = lighten_color(color, 60)
-                self._background_color: QColor = QColor(new_color[0], new_color[1], new_color[2])
-            else:
-                self._background_color: QColor = QColor(background_color[0], background_color[1], background_color[2])
+        self._background_color = None
+        self.set_background_color(background_color)
 
-        if 0 <= border_roundness <= 1:
-            self._border_roundness = border_roundness * self._bar_height * 0.6
-        else:
-            print("Error: border roundness must be a float between 0 and 1")
-            sys.exit()
+        self._border_roundness_input = None
+        self._border_roundness = None
+        self.set_border_roundness(border_roundness)
 
         self._current_value = 0
         self._percent_complete = 0.0
 
         self._border_path = None
-
-        # self._current_counter: int = 0
-        # self._timer: QTimer = QTimer(self)
-        # self._timer.timeout.connect(self._rotate)
-        # self._update_timer()
-        # self._is_spinning = True
-        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self._update_size()
         self.hide()
@@ -94,12 +77,6 @@ class ParentBar(QWidget):
                 self.setFixedHeight(self._bar_height + (2 * self._border_width))
             else:
                 self._bar_height = self.size().height()
-
-    # def _update_timer(self) -> None:
-    #     """Update the spinning speed of the WaitingSpinner."""
-    #     self._timer.setInterval(
-    #         int(1000 / (self._number_of_lines * self._revolutions_per_second))
-    #     )
 
     def _update_position(self) -> None:
         """Center ProgressBar on parent widget."""
@@ -201,6 +178,80 @@ class ParentBar(QWidget):
 
         self._border_path = path
 
+    def get_minimum(self):
+        return self._minimum
+
+    def get_maximum(self):
+        return self._maximum
+
+    def get_color(self):
+        return self._color.getRgb()
+
+    def get_bar_length(self):
+        return self._bar_length
+
+    def get_bar_height(self):
+        return self._bar_height
+
+    def get_background_color(self):
+        return self._background_color.getRgb()
+
+    def get_border_width(self):
+        return self._border_width
+
+    def get_border_roundness(self):
+        return self._border_roundness_input
+
+    def get_is_vertical(self):
+        return self._is_vertical
+
+    def set_minimum(self, min: int):
+        self._minimum = min
+        if self._maximum is not None:
+            self._is_determinate = True
+
+    def set_maximum(self, max: int):
+        self._maximum = max
+        if self._minimum is not None:
+            self._is_determinate = True
+
+    def set_bar_length(self, length: int):
+        self._bar_length = length
+        self.repaint()
+
+    def set_bar_height(self, height: int):
+        self._bar_height = height
+        self.set_border_roundness(self._border_roundness_input)
+        self.repaint()
+
+    def set_border_roundness(self, border_roundness: float):
+        self._border_roundness_input = border_roundness
+        if 0 <= self._border_roundness_input <= 1:
+            self._border_roundness = self._border_roundness_input * self._bar_height * 0.5
+        else:
+            print("Error: border roundness must be a float between 0 and 1")
+            self._border_roundness = 0
+
+    def set_vertical(self, is_vertical: bool):
+        self._is_vertical = is_vertical
+        self.repaint()
+
+    def set_color(self, color: tuple[int, int, int]):
+        self._color = QColor(color[0], color[1], color[2])
+        self.repaint()
+
+    def set_background_color(self, background_color: tuple[int, int, int]):
+        if background_color is not None:
+            if background_color[0] == -1:
+                new_color = lighten_color(self._color.getRgb(), 60)
+                self._background_color: QColor = QColor(new_color[0], new_color[1], new_color[2])
+            else:
+                self._background_color: QColor = QColor(background_color[0], background_color[1], background_color[2])
+
+    def set_border_width(self, width: int):
+        self._border_width = width
+        self.repaint()
+
     def get_percent_complete(self):
         return self._percent_complete
 
@@ -215,9 +266,12 @@ class ParentBar(QWidget):
         self.repaint()
 
     def set_value(self, value: int):
-        self._current_value = value
-        self._recalculate_percent_complete()
-        self.repaint()
+        if self._is_determinate:
+            self._current_value = value
+            self._recalculate_percent_complete()
+            self.repaint()
+        else:
+            print("ERROR: Can't set value without minimum and maximum values set")
 
     def start_bar(self):
         self._update_position()
@@ -233,3 +287,5 @@ def lighten_color(color: tuple[int, int, int], amount_lightened: int):
     new_green = round(color[1] + (255 - color[1]) * increase_fraction)
     new_blue = round(color[2] + (255 - color[2]) * increase_fraction)
     return new_red, new_green, new_blue
+
+

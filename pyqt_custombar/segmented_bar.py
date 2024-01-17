@@ -44,11 +44,8 @@ class SegmentedBar(ParentBar):
         self._seg_spacing = segment_spacing
         self._set_number_of_segs()
 
-        if 0.0 <= segment_roundness <= 1.0:
-            self._seg_roundness = segment_roundness * 100
-        else:
-            print("Error: segment roundness must be a float between 0 and 1")
-            sys.exit()
+        self._seg_roundness = None
+        self.set_segment_roundness(segment_roundness)
 
     def paintEvent(self, _: QPaintEvent) -> None:
         """Paint the SegmentedBar."""
@@ -109,3 +106,21 @@ class SegmentedBar(ParentBar):
         self._num_of_segs = round((self._bar_length + self._seg_spacing) / (self._target_seg_width + self._seg_spacing))
         self._seg_width = math.floor((self._bar_length - (self._num_of_segs * self._seg_spacing - self._seg_spacing)) / self._num_of_segs)
         self._extra_room = self._bar_length - (self._num_of_segs * self._seg_spacing - self._seg_spacing) - (self._num_of_segs * self._seg_width)
+
+    def get_segment_width(self):
+        return self._seg_width
+
+    def get_segment_roundness(self):
+        return self._seg_roundness / 100
+
+    def set_segment_width(self, width: int):
+        self._target_seg_width = width
+        self._set_number_of_segs()
+
+    def set_segment_roundness(self, segment_roundness: float):
+        if 0.0 <= segment_roundness <= 1.0:
+            self._seg_roundness = segment_roundness * 100
+        else:
+            print("Error: segment roundness must be a float between 0 and 1")
+            self._seg_roundness = 100
+

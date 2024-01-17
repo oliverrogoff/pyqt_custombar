@@ -33,9 +33,6 @@ class FilledBar(ParentBar):
                          border_roundness=border_roundness,
                          is_vertical=is_vertical)
 
-        self._num_of_segs = None
-        self._seg_width = None
-
     def paintEvent(self, _: QPaintEvent) -> None:
         """Paint the SegmentedBar."""
         self._update_position()
