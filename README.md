@@ -10,6 +10,12 @@ The parameters that both progress bar widgets have in common are as follows:
   - type: `QWidget`
   - the parent widget to the progress bar
   - no default value
+- bar_length
+  - type: `int`
+  - the length of the progress bar
+- bar_height
+  - type: `int`
+  - the height (or thickness) of the progress bar
 - minimum
   - type: `int`
   - optional, if it is not `None` it is required that you also pass in a value for maximum
@@ -28,12 +34,6 @@ The parameters that both progress bar widgets have in common are as follows:
   - type: `bool`
   - if `True`, the bar will attempt to disable user interaction with the parent widget while the progress bar is running
   - default value: `False`
-- bar_length
-  - type: `int`
-  - the length of the progress bar
-- bar_height
-  - type: `int`
-  - the height (or thickness) of the progress bar
 -color
   - type: `tuple[int, int, int]`
   - the color of the progress bar (filled portion) in RBG format
